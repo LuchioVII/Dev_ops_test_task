@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+        - name: django
+          image: luchio0001/devops_dj_app:v2
+          envFrom:
+            - secretRef:
+                name: django-secret
+            - configMapRef:
+                name: django-config
+          ports:
+            - containerPort: 8000
+          command:
+            - "sh"
+            - "-c"
+            - "chmod +x ./migrations_and_superuser.sh && ./migrations_and_superuser.sh && python manage.py runserver 0.0.0.0:8000"

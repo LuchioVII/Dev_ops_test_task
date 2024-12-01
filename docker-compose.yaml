@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5450:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  django:
+    build:
+      context: .
+    container_name: django
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - rabbitmq
+    command: >
+      sh -c "chmod +x ./migrations_and_superuser.sh && ./migrations_and_superuser.sh && python manage.py runserver 0.0.0.0:8000"
+
+  celery:
+    container_name: celery
+    build:
+      context: .
+    command: celery -A simple_app.celery worker -l info
+    volumes:
+      - ./django_simple_app:/django_simple_app
+    env_file:
+      - .env
+    depends_on:
+      - django
+      - rabbitmq
+
+volumes:
+  postgres_data:

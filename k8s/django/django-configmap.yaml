@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+data:
+  POSTGRES_DB: "django_db"
+  POSTGRES_USER: "django_user"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  CELERY_BROKER_URL: "amqp://root:root@rabbitmq:5672//"
+  CELERY_RESULT_BACKEND: "rpc://"
+  DJANGO_DEBUG: "True"
